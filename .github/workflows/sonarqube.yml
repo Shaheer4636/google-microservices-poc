@@ -22,41 +22,41 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Set up Node.js for JavaScript/TypeScript projects
-      - name: Set up Node.js for JavaScript/TypeScript projects
-        if: matrix.language == 'nodejs'
+      # Set up Node.js
+      - name: Set up Node.js
+        if: matrix.language == 'nodejs' && fileExists('package.json')
         uses: actions/setup-node@v3
         with:
-          node-version: '16'  # Choose the Node.js version
+          node-version: '16'
 
-      # Set up Go for Go projects
-      - name: Set up Go for Go projects
-        if: matrix.language == 'go'
+      # Set up Go
+      - name: Set up Go
+        if: matrix.language == 'go' && fileExists('go.mod')
         uses: actions/setup-go@v4
         with:
-          go-version: '1.18'  # Choose the Go version
+          go-version: '1.18'
 
-      # Set up JDK for Java projects (fixing the missing distribution input)
-      - name: Set up JDK for Java projects
-        if: matrix.language == 'java'
+      # Set up JDK for Java
+      - name: Set up JDK for Java
+        if: matrix.language == 'java' && (fileExists('build.gradle') || fileExists('pom.xml'))
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'  # Specify the JDK distribution (e.g., temurin)
-          java-version: '11'  # Choose the JDK version
+          distribution: 'temurin'
+          java-version: '11'
 
-      # Set up Python for Python projects
-      - name: Set up Python for Python projects
-        if: matrix.language == 'python'
+      # Set up Python
+      - name: Set up Python
+        if: matrix.language == 'python' && fileExists('requirements.txt')
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'  # Choose the Python version
+          python-version: '3.10'
 
-      # Set up .NET for C# projects
-      - name: Set up .NET for C# projects
-        if: matrix.language == 'csharp'
+      # Set up .NET for C#
+      - name: Set up .NET for C#
+        if: matrix.language == 'csharp' && fileExists('*.csproj')
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '6.0'  # Choose the .NET version
+          dotnet-version: '6.0'
 
       # Cache SonarQube packages
       - name: Cache SonarQube packages
@@ -65,79 +65,62 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
 
-      # Install dependencies for Node.js projects
-      - name: Install dependencies for Node.js projects
-        if: matrix.language == 'nodejs'
-        run: |
-          if [ -f "package.json" ]; then
-            npm install
-          else
-            echo "No package.json file found"
-            exit 1
-          fi
+      # Install dependencies for Node.js
+      - name: Install Node.js dependencies
+        if: matrix.language == 'nodejs' && fileExists('package.json')
+        run: npm install
 
-      # Install dependencies for Go projects
-      - name: Install dependencies for Go projects
-        if: matrix.language == 'go'
-        run: |
-          if [ -f "go.mod" ]; then
-            go mod tidy
-          else
-            echo "No go.mod file found"
-            exit 1
-          fi
+      # Install dependencies for Go
+      - name: Install Go dependencies
+        if: matrix.language == 'go' && fileExists('go.mod')
+        run: go mod tidy
 
-      # Install dependencies for Java projects
-      - name: Install dependencies for Java projects
-        if: matrix.language == 'java'
+      # Install dependencies for Java
+      - name: Install Java dependencies
+        if: matrix.language == 'java' && (fileExists('build.gradle') || fileExists('pom.xml'))
         run: |
           if [ -f "build.gradle" ]; then
             ./gradlew build -x test
-          elif [ -f "pom.xml" ]; then
+          else
             mvn clean install
-          else
-            echo "No build.gradle or pom.xml file found"
-            exit 1
           fi
 
-      # Install dependencies for Python projects
-      - name: Install dependencies for Python projects
-        if: matrix.language == 'python'
+      # Install dependencies for Python
+      - name: Install Python dependencies
+        if: matrix.language == 'python' && fileExists('requirements.txt')
         run: |
-          if [ -f "requirements.txt" ]; then
-            python -m pip install --upgrade pip
-            pip install -r requirements.txt
-          else
-            echo "No requirements.txt file found"
-            exit 1
-          fi
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      # Install dependencies for C# projects (fixing wildcard issue)
-      - name: Install dependencies for C# projects
-        if: matrix.language == 'csharp'
-        run: |
-          csproj_files=$(find . -name '*.csproj')
-          if [ -n "$csproj_files" ]; then
-            dotnet restore
-          else
-            echo "No .csproj file found"
-            exit 1
-          fi
+      # Install dependencies for C#
+      - name: Install C# dependencies
+        if: matrix.language == 'csharp' && fileExists('*.csproj')
+        run: dotnet restore
 
       # Run SonarCloud Analysis
       - name: Run SonarCloud Analysis
         uses: SonarSource/sonarqube-scan-action@7295e71c9583053f5bf40e9d4068a0c974603ec8
         env:
-          GITHUB_TOKEN: ${{ secrets.ORIGINAL_GITHUB_TOKEN }}  # Needed to get PR information
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # SonarCloud token stored in secrets
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}  # SonarCloud URL stored in secrets
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         with:
           args: |
             -Dsonar.projectKey="Shaheer4636_google-microservices-poc"
             -Dsonar.organization=shaheer4636
             -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info  # For Node.js coverage report
-            -Dsonar.go.coverage.reportPaths=coverage.out  # For Go coverage report
-            -Dsonar.java.coveragePlugin=jacoco  # For Java coverage report
-            -Dsonar.python.coverage.reportPaths=coverage.xml  # For Python coverage report
-            -Dsonar.cs.vscoveragexml.reportsPaths=**/*.coveragexml  # For C# coverage report
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.go.coverage.reportPaths=coverage.out
+            -Dsonar.java.coveragePlugin=jacoco
+            -Dsonar.python.coverage.reportPaths=coverage.xml
+            -Dsonar.cs.vscoveragexml.reportsPaths=**/*.coveragexml
+
+# Function to check file existence
+jobs:
+  SonarCloud-Analysis:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check for file existence
+        run: |
+          echo "::set-output name=exists::$(test -f 'package.json' && echo 'true' || echo 'false')"
