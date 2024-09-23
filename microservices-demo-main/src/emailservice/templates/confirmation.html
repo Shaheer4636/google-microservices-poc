@@ -48,6 +48,8 @@
           <td>{{ item.cost.units }}.{{ "%02d" | format(item.cost.nanos // 10000000) }} {{ item.cost.currency_code }}</td>
         </tr>
         {% endfor %}
+        <br>
+        <br>
     </table>
   </body>
 </html>
