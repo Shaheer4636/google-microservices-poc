@@ -1,0 +1,99 @@
+name: SonarCloud Code Analysis
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+permissions:
+  pull-requests: read  # Allows SonarCloud to decorate PRs with analysis results
+
+jobs:
+  SonarCloud-Analysis:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        language: [ nodejs, go, java, python, csharp ]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js for JavaScript/TypeScript projects
+        if: matrix.language == 'nodejs'
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'  # Choose the Node.js version
+
+      - name: Set up Go for Go projects
+        if: matrix.language == 'go'
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.18'  # Choose the Go version
+
+      - name: Set up JDK for Java projects
+        if: matrix.language == 'java'
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'  # Choose the JDK version
+
+      - name: Set up Python for Python projects
+        if: matrix.language == 'python'
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'  # Choose the Python version
+
+      - name: Set up .NET for C# projects
+        if: matrix.language == 'csharp'
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0'  # Choose the .NET version
+
+      - name: Cache SonarQube packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+
+      - name: Install dependencies for Node.js projects
+        if: matrix.language == 'nodejs'
+        run: npm install
+
+      - name: Install dependencies for Go projects
+        if: matrix.language == 'go'
+        run: go mod tidy
+
+      - name: Install dependencies for Java projects
+        if: matrix.language == 'java'
+        run: |
+          ./gradlew build -x test
+
+      - name: Install dependencies for Python projects
+        if: matrix.language == 'python'
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install dependencies for C# projects
+        if: matrix.language == 'csharp'
+        run: dotnet restore
+
+      - name: Run SonarCloud Analysis
+        uses: SonarSource/sonarqube-scan-action@7295e71c9583053f5bf40e9d4068a0c974603ec8
+        env:
+          GITHUB_TOKEN: ${{ secrets.ORIGINAL_GITHUB_TOKEN }}  # Needed to get PR information
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # SonarCloud token stored in secrets
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}  # SonarCloud URL stored in secrets
+        with:
+          args: |
+            -Dsonar.projectKey="Shaheer4636_google-microservices-poc"
+            -Dsonar.organization=shaheer4636
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info  # For Node.js coverage report
+            -Dsonar.go.coverage.reportPaths=coverage.out  # For Go coverage report
+            -Dsonar.java.coveragePlugin=jacoco  # For Java coverage report
+            -Dsonar.python.coverage.reportPaths=coverage.xml  # For Python coverage report
+            -Dsonar.cs.vscoveragexml.reportsPaths=**/*.coveragexml  # For C# coverage report
