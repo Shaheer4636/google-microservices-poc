@@ -29,7 +29,7 @@
 #     - name: Azure login
 #       uses: azure/login@v1.4.7
 #       with:
-#         creds: ${{ secrets.AZURE_CREDENTIALS }}
+        # creds: ${{ secrets.AZURE_CREDENTIALS }}
 
 #     - name: Install Terraform
 #       run: |

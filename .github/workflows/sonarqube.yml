@@ -22,78 +22,107 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Node.js setup and install dependencies
+      # Set up Node.js for JavaScript/TypeScript projects
       - name: Set up Node.js for JavaScript/TypeScript projects
         if: matrix.language == 'nodejs'
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '16'  # Choose the Node.js version
 
-      - name: Install Node.js dependencies
-        if: matrix.language == 'nodejs'
-        run: |
-          npm install
-          npm run test -- --coverage  # Run tests and generate coverage report for Node.js
-
-      # Go setup and install dependencies
+      # Set up Go for Go projects
       - name: Set up Go for Go projects
         if: matrix.language == 'go'
         uses: actions/setup-go@v4
         with:
-          go-version: '1.18'
+          go-version: '1.18'  # Choose the Go version
 
-      - name: Install Go dependencies
-        if: matrix.language == 'go'
-        run: |
-          go mod tidy
-          go test -coverprofile=coverage.out  # Run tests and generate coverage report for Go
-
-      # Java setup and install dependencies
+      # Set up JDK for Java projects
       - name: Set up JDK for Java projects
         if: matrix.language == 'java'
         uses: actions/setup-java@v3
         with:
-          java-version: '11'
+          java-version: '11'  # Choose the JDK version
 
-      - name: Install Java dependencies
-        if: matrix.language == 'java'
-        run: |
-          ./gradlew build -x test
-          ./gradlew jacocoTestReport  # Run tests and generate Jacoco coverage report for Java
-
-      # Python setup and install dependencies
+      # Set up Python for Python projects
       - name: Set up Python for Python projects
         if: matrix.language == 'python'
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.10'  # Choose the Python version
 
-      - name: Install Python dependencies
-        if: matrix.language == 'python'
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pytest --cov --cov-report=xml  # Run tests and generate coverage report for Python
-
-      # C# setup and install dependencies
+      # Set up .NET for C# projects
       - name: Set up .NET for C# projects
         if: matrix.language == 'csharp'
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '6.0'
+          dotnet-version: '6.0'  # Choose the .NET version
 
-      - name: Install C# dependencies
-        if: matrix.language == 'csharp'
-        run: |
-          dotnet restore
-          dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover  # Run tests and generate coverage report for C#
-
+      # Cache SonarQube packages
       - name: Cache SonarQube packages
         uses: actions/cache@v3
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
 
+      # Install dependencies for Node.js projects
+      - name: Install dependencies for Node.js projects
+        if: matrix.language == 'nodejs'
+        run: |
+          if [ -f "package.json" ]; then
+            npm install
+          else
+            echo "No package.json file found"
+            exit 1
+          fi
+
+      # Install dependencies for Go projects
+      - name: Install dependencies for Go projects
+        if: matrix.language == 'go'
+        run: |
+          if [ -f "go.mod" ]; then
+            go mod tidy
+          else
+            echo "No go.mod file found"
+            exit 1
+          fi
+
+      # Install dependencies for Java projects
+      - name: Install dependencies for Java projects
+        if: matrix.language == 'java'
+        run: |
+          if [ -f "build.gradle" ]; then
+            ./gradlew build -x test
+          elif [ -f "pom.xml" ]; then
+            mvn clean install
+          else
+            echo "No build.gradle or pom.xml file found"
+            exit 1
+          fi
+
+      # Install dependencies for Python projects
+      - name: Install dependencies for Python projects
+        if: matrix.language == 'python'
+        run: |
+          if [ -f "requirements.txt" ]; then
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
+          else
+            echo "No requirements.txt file found"
+            exit 1
+          fi
+
+      # Install dependencies for C# projects
+      - name: Install dependencies for C# projects
+        if: matrix.language == 'csharp'
+        run: |
+          if [ -f "*.csproj" ]; then
+            dotnet restore
+          else
+            echo "No .csproj file found"
+            exit 1
+          fi
+
+      # Run SonarCloud Analysis
       - name: Run SonarCloud Analysis
         uses: SonarSource/sonarqube-scan-action@7295e71c9583053f5bf40e9d4068a0c974603ec8
         env:
