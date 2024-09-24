@@ -10,7 +10,7 @@ variable "resource_group_name" {
 
 variable "acr_name" {
   type = string
-  default="skilltechregistry"
+  default="shaheergooglepracticeregistry"
 }
 
 

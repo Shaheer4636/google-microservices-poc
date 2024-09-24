@@ -1,126 +1,126 @@
-name: SonarCloud Code Analysis
+# name: SonarCloud Code Analysis
 
-on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
-  workflow_dispatch:
+# on:
+#   push:
+#     branches: [ "master" ]
+#   pull_request:
+#     branches: [ "master" ]
+#   workflow_dispatch:
 
-permissions:
-  pull-requests: read  # Allows SonarCloud to decorate PRs with analysis results
+# permissions:
+#   pull-requests: read  # Allows SonarCloud to decorate PRs with analysis results
 
-jobs:
-  SonarCloud-Analysis:
-    runs-on: ubuntu-latest
+# jobs:
+#   SonarCloud-Analysis:
+#     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        language: [ nodejs, go, java, python, csharp ]
+#     strategy:
+#       matrix:
+#         language: [ nodejs, go, java, python, csharp ]
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
 
-      # Set up Node.js
-      - name: Set up Node.js
-        if: matrix.language == 'nodejs' && fileExists('package.json')
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
+#       # Set up Node.js
+#       - name: Set up Node.js
+#         if: matrix.language == 'nodejs' && fileExists('package.json')
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: '16'
 
-      # Set up Go
-      - name: Set up Go
-        if: matrix.language == 'go' && fileExists('go.mod')
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.18'
+#       # Set up Go
+#       - name: Set up Go
+#         if: matrix.language == 'go' && fileExists('go.mod')
+#         uses: actions/setup-go@v4
+#         with:
+#           go-version: '1.18'
 
-      # Set up JDK for Java
-      - name: Set up JDK for Java
-        if: matrix.language == 'java' && (fileExists('build.gradle') || fileExists('pom.xml'))
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '11'
+#       # Set up JDK for Java
+#       - name: Set up JDK for Java
+#         if: matrix.language == 'java' && (fileExists('build.gradle') || fileExists('pom.xml'))
+#         uses: actions/setup-java@v3
+#         with:
+#           distribution: 'temurin'
+#           java-version: '11'
 
-      # Set up Python
-      - name: Set up Python
-        if: matrix.language == 'python' && fileExists('requirements.txt')
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
+#       # Set up Python
+#       - name: Set up Python
+#         if: matrix.language == 'python' && fileExists('requirements.txt')
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: '3.10'
 
-      # Set up .NET for C#
-      - name: Set up .NET for C#
-        if: matrix.language == 'csharp' && fileExists('*.csproj')
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '6.0'
+#       # Set up .NET for C#
+#       - name: Set up .NET for C#
+#         if: matrix.language == 'csharp' && fileExists('*.csproj')
+#         uses: actions/setup-dotnet@v3
+#         with:
+#           dotnet-version: '6.0'
 
-      # Cache SonarQube packages
-      - name: Cache SonarQube packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
+#       # Cache SonarQube packages
+#       - name: Cache SonarQube packages
+#         uses: actions/cache@v3
+#         with:
+#           path: ~/.sonar/cache
+#           key: ${{ runner.os }}-sonar
 
-      # Install dependencies for Node.js
-      - name: Install Node.js dependencies
-        if: matrix.language == 'nodejs' && fileExists('package.json')
-        run: npm install
+#       # Install dependencies for Node.js
+#       - name: Install Node.js dependencies
+#         if: matrix.language == 'nodejs' && fileExists('package.json')
+#         run: npm install
 
-      # Install dependencies for Go
-      - name: Install Go dependencies
-        if: matrix.language == 'go' && fileExists('go.mod')
-        run: go mod tidy
+#       # Install dependencies for Go
+#       - name: Install Go dependencies
+#         if: matrix.language == 'go' && fileExists('go.mod')
+#         run: go mod tidy
 
-      # Install dependencies for Java
-      - name: Install Java dependencies
-        if: matrix.language == 'java' && (fileExists('build.gradle') || fileExists('pom.xml'))
-        run: |
-          if [ -f "build.gradle" ]; then
-            ./gradlew build -x test
-          else
-            mvn clean install
-          fi
+#       # Install dependencies for Java
+#       - name: Install Java dependencies
+#         if: matrix.language == 'java' && (fileExists('build.gradle') || fileExists('pom.xml'))
+#         run: |
+#           if [ -f "build.gradle" ]; then
+#             ./gradlew build -x test
+#           else
+#             mvn clean install
+#           fi
 
-      # Install dependencies for Python
-      - name: Install Python dependencies
-        if: matrix.language == 'python' && fileExists('requirements.txt')
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+#       # Install dependencies for Python
+#       - name: Install Python dependencies
+#         if: matrix.language == 'python' && fileExists('requirements.txt')
+#         run: |
+#           python -m pip install --upgrade pip
+#           pip install -r requirements.txt
 
-      # Install dependencies for C#
-      - name: Install C# dependencies
-        if: matrix.language == 'csharp' && fileExists('*.csproj')
-        run: dotnet restore
+#       # Install dependencies for C#
+#       - name: Install C# dependencies
+#         if: matrix.language == 'csharp' && fileExists('*.csproj')
+#         run: dotnet restore
 
-      # Run SonarCloud Analysis
-      - name: Run SonarCloud Analysis
-        uses: SonarSource/sonarqube-scan-action@7295e71c9583053f5bf40e9d4068a0c974603ec8
-        env:
-          GITHUB_TOKEN: ${{ secrets.ORIGINAL_GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        with:
-          args: |
-            -Dsonar.projectKey="Shaheer4636_google-microservices-poc"
-            -Dsonar.organization=shaheer4636
-            -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-            -Dsonar.go.coverage.reportPaths=coverage.out
-            -Dsonar.java.coveragePlugin=jacoco
-            -Dsonar.python.coverage.reportPaths=coverage.xml
-            -Dsonar.cs.vscoveragexml.reportsPaths=**/*.coveragexml
+#       # Run SonarCloud Analysis
+#       - name: Run SonarCloud Analysis
+#         uses: SonarSource/sonarqube-scan-action@7295e71c9583053f5bf40e9d4068a0c974603ec8
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.ORIGINAL_GITHUB_TOKEN }}
+#           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+#           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+#         with:
+#           args: |
+#             -Dsonar.projectKey="Shaheer4636_google-microservices-poc"
+#             -Dsonar.organization=shaheer4636
+#             -Dsonar.host.url=https://sonarcloud.io
+#             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+#             -Dsonar.go.coverage.reportPaths=coverage.out
+#             -Dsonar.java.coveragePlugin=jacoco
+#             -Dsonar.python.coverage.reportPaths=coverage.xml
+#             -Dsonar.cs.vscoveragexml.reportsPaths=**/*.coveragexml
 
-# Function to check file existence
-jobs:
-  SonarCloud-Analysis:
-    runs-on: ubuntu-latest
+# # Function to check file existence
+# jobs:
+#   SonarCloud-Analysis:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: Check for file existence
-        run: |
-          echo "::set-output name=exists::$(test -f 'package.json' && echo 'true' || echo 'false')"
+#     steps:
+#       - name: Check for file existence
+#         run: |
+#           echo "::set-output name=exists::$(test -f 'package.json' && echo 'true' || echo 'false')"
