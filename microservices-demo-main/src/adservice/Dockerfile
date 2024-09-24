@@ -21,22 +21,24 @@
 # EXPOSE 9555
 # ENTRYPOINT ["/app/build/install/hipstershop/bin/AdService"]
 
-
-# Stage 1: Build
+##############################################################################
 # Stage 1: Build
 FROM eclipse-temurin:21 AS builder
 
 WORKDIR /app
 
-# Copy build.gradle and gradlew into the working directory
-COPY ./src/adservice/build.gradle ./src/adservice/gradlew ./
-COPY ./src/adservice/gradle/ ./gradle/  # Ensure gradle/ directory exists in the build context
+# Copy build.gradle, gradlew, and settings.gradle from adservice
+COPY ./src/adservice/build.gradle ./src/adservice/gradlew ./src/adservice/settings.gradle ./
 
+# Copy gradle directory from the project root (higher up in the file tree)
+COPY ./gradle ./gradle
+
+# Make gradlew executable and download repositories
 RUN chmod +x gradlew
 RUN ./gradlew downloadRepos
 
-# Copy the rest of the application files
-COPY ./src/adservice .
+# Copy the rest of the adservice files
+COPY ./src/adservice .  # Copy all adservice contents
 
 # Build the application
 RUN chmod +x gradlew
@@ -46,6 +48,8 @@ RUN ./gradlew installDist
 FROM eclipse-temurin:21.0.4_7-jre-alpine
 
 WORKDIR /app
+
+# Copy the built application from the first stage
 COPY --from=builder /app/build/install/hipstershop/bin/AdService .
 
 # Expose the service port
