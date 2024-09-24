@@ -23,18 +23,20 @@
 
 
 # Stage 1: Build
+# Stage 1: Build
 FROM eclipse-temurin:21 AS builder
 
 WORKDIR /app
 
-# Copy only what's needed for the build
-COPY ["build.gradle", "gradlew", "./"]
-COPY gradle/ gradle/
+# Copy build.gradle and gradlew into the working directory
+COPY ./src/adservice/build.gradle ./src/adservice/gradlew ./
+COPY ./src/adservice/gradle/ ./gradle/  # Ensure gradle/ directory exists in the build context
+
 RUN chmod +x gradlew
 RUN ./gradlew downloadRepos
 
 # Copy the rest of the application files
-COPY . .
+COPY ./src/adservice .
 
 # Build the application
 RUN chmod +x gradlew
