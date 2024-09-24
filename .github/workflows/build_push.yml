@@ -14,7 +14,7 @@ env:
   AZURE_REGION: 'australiaeast'
   RESOURCE_GROUP: 'microservices-demo-rg'
   AKS_CLUSTER_NAME: 'microservices-demo-aks'
-  ACR_NAME: shaheergooglepracticeregistry
+  ACR_NAME: 'shaheergooglepracticeregistry'
   IMAGE_TAG: latest
 
 jobs:
