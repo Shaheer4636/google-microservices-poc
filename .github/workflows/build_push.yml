@@ -1,0 +1,96 @@
+name: Build and Push Docker Images to ACR
+
+on:
+  push:
+    branches:
+      - dev
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  ACR_NAME: shaheergooglepracticeregistry
+  AZURE_REGION: 'australiaeast'
+  RESOURCE_GROUP: 'microservices-demo-rg'
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Install Azure CLI
+      run: |
+        curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+    - name: Azure Container Registry Login
+      run: |
+        az acr login --name ${{ env.ACR_NAME }}
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    # Build and push Docker images for each service
+    - name: Build and Push adservice image
+      run: |
+        docker build -t ${{ env.ACR_NAME }}.azurecr.io/adservice:${{ env.IMAGE_TAG }} -f ./dockerfile .
+        docker push ${{ env.ACR_NAME }}.azurecr.io/adservice:${{ env.IMAGE_TAG }}
+
+    - name: Build and Push cartservice image
+      run: |
+        docker build -t ${{ env.ACR_NAME }}.azurecr.io/cartservice:${{ env.IMAGE_TAG }} -f ./src/dockerfile .
+        docker push ${{ env.ACR_NAME }}.azurecr.io/cartservice:${{ env.IMAGE_TAG }}
+
+    - name: Build and Push currencyservice image
+      run: |
+        docker build -t ${{ env.ACR_NAME }}.azurecr.io/currencyservice:${{ env.IMAGE_TAG }} -f ./dockerfile .
+        docker push ${{ env.ACR_NAME }}.azurecr.io/currencyservice:${{ env.IMAGE_TAG }}
+
+    - name: Build and Push emailservice image
+      run: |
+        docker build -t ${{ env.ACR_NAME }}.azurecr.io/emailservice:${{ env.IMAGE_TAG }} -f ./dockerfile .
+        docker push ${{ env.ACR_NAME }}.azurecr.io/emailservice:${{ env.IMAGE_TAG }}
+
+    - name: Build and Push frontend image
+      run: |
+        docker build -t ${{ env.ACR_NAME }}.azurecr.io/frontend:${{ env.IMAGE_TAG }} -f ./dockerfile .
+        docker push ${{ env.ACR_NAME }}.azurecr.io/frontend:${{ env.IMAGE_TAG }}
+
+    - name: Build and Push loadgenerator image
+      run: |
+        docker build -t ${{ env.ACR_NAME }}.azurecr.io/loadgenerator:${{ env.IMAGE_TAG }} -f ./dockerfile .
+        docker push ${{ env.ACR_NAME }}.azurecr.io/loadgenerator:${{ env.IMAGE_TAG }}
+
+    - name: Build and Push paymentservice image
+      run: |
+        docker build -t ${{ env.ACR_NAME }}.azurecr.io/paymentservice:${{ env.IMAGE_TAG }} -f ./dockerfile .
+        docker push ${{ env.ACR_NAME }}.azurecr.io/paymentservice:${{ env.IMAGE_TAG }}
+
+    - name: Build and Push productcatalogservice image
+      run: |
+        docker build -t ${{ env.ACR_NAME }}.azurecr.io/productcatalogservice:${{ env.IMAGE_TAG }} -f ./dockerfile .
+        docker push ${{ env.ACR_NAME }}.azurecr.io/productcatalogservice:${{ env.IMAGE_TAG }}
+
+    - name: Build and Push
+      run: |
+        docker build -t ${{ env.ACR_NAME }}.azurecr.io/recommendationservice:${{ env.IMAGE_TAG }} -f ./dockerfile .
+        docker push ${{ env.ACR_NAME }}.azurecr.io/recommendationservice:${{ env.IMAGE_TAG }}
+
+    - name: Build and Push shippingservice image
+      run: |
+        docker build -t ${{ env.ACR_NAME }}.azurecr.io/shippingservice:${{ env.IMAGE_TAG }} -f ./dockerfile .
+        docker push ${{ env.ACR_NAME }}.azurecr.io/shippingservice:${{ env.IMAGE_TAG }}
+
+    - name: Build and Push shoppingassistanceservice image
+      run: |
+        docker build -t ${{ env.ACR_NAME }}.azurecr.io/shoppingassistanceservice:${{ env.IMAGE_TAG }} -f ./dockerfile .
+        docker push ${{ env.ACR_NAME }}.azurecr.io/shoppingassistanceservice:${{ env.IMAGE_TAG }}
