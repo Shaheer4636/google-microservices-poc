@@ -31,7 +31,7 @@ WORKDIR /app
 COPY ./src/adservice/build.gradle ./src/adservice/gradlew ./src/adservice/settings.gradle ./
 
 # Copy gradle directory from the project root (higher up in the file tree)
-COPY ./gradle ./gradle
+COPY ../gradle ./gradle
 
 # Make gradlew executable and download repositories
 RUN chmod +x gradlew
