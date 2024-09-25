@@ -44,7 +44,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: frontend
+          image: shaheergooglepracticeregistry.azurecr.io/frontend:latest
           ports:
           - containerPort: 8080
           readinessProbe:

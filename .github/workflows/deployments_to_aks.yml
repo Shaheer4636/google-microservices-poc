@@ -1,0 +1,37 @@
+name: Deploy to AKS on Push to Dev
+
+on:
+  push:
+    branches:
+      - dev  # Triggers on push to 'dev' branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout kubernetes-manifests directory only
+      run: |
+        mkdir kubernetes-manifests
+        cd kubernetes-manifests
+        git init
+        git remote add origin https://github.com/Shaheer4636/google-microservices-poc.git
+        git config core.sparseCheckout true
+        echo "microservices-demo-main/kubernetes-manifests/*" >> .git/info/sparse-checkout
+        git pull origin master
+        
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}  # Use your Azure service principal secret
+
+    - name: Set up AKS context
+      uses: azure/aks-set-context@v2
+      with:
+        resource-group: 'microservices-demo-rg'  # Replace with your resource group name
+        cluster-name: 'microservices-demo-aks'  # Replace with your AKS cluster name
+
+    - name: Apply Kubernetes Manifests
+      run: |
+        cd repo/microservices-demo-main/kubernetes-manifestss  # Navigate to the correct path
+        kubectl apply -f .  # Apply all manifests in the directory
