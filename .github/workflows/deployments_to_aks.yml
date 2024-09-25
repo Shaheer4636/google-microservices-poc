@@ -3,7 +3,7 @@ name: Deploy to AKS on Push to Dev
 on:
   push:
     branches:
-      - dev  # Triggers on push to 'dev' branch
+      - dev  
 
 jobs:
   deploy:
@@ -35,4 +35,4 @@ jobs:
     - name: Apply Kubernetes Manifests
       run: |
         cd kubernetes-manifests  # Navigate to the kubernetes-manifests directory
-        kubectl apply -f .  # Apply all manifests in the directory
+        kubectl apply -f .  
