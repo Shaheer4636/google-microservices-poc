@@ -3,24 +3,13 @@ name: Deploy to AKS on Push to Dev
 on:
   push:
     branches:
-      - dev  
+      - dev  # Triggers on push to 'dev' branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout kubernetes-manifests directory
-      run: |
-        # Create a directory to hold the manifests
-        mkdir kubernetes-manifests
-        cd kubernetes-manifests
-        git init
-        git remote add origin https://github.com/Shaheer4636/google-microservices-poc.git
-        git config core.sparseCheckout true
-        echo "microservices-demo-main/kubernetes-manifests/*" >> .git/info/sparse-checkout
-        git pull origin dev  # Clone the manifests from the dev branch
-
     - name: Log in to Azure
       uses: azure/login@v1
       with:
@@ -34,5 +23,16 @@ jobs:
 
     - name: Apply Kubernetes Manifests
       run: |
-        cd kubernetes-manifests  # Navigate to the kubernetes-manifests directory
-        kubectl apply -f .  
+        # Apply all manifest files directly from the URLs
+        kubectl apply -f https://raw.githubusercontent.com/Shaheer4636/google-microservices-poc/master/microservices-demo-main/kubernetes-manifests/adservice.yaml
+        kubectl apply -f https://raw.githubusercontent.com/Shaheer4636/google-microservices-poc/master/microservices-demo-main/kubernetes-manifests/cartservice.yaml
+        kubectl apply -f https://raw.githubusercontent.com/Shaheer4636/google-microservices-poc/master/microservices-demo-main/kubernetes-manifests/checkoutservice.yaml
+        kubectl apply -f https://raw.githubusercontent.com/Shaheer4636/google-microservices-poc/master/microservices-demo-main/kubernetes-manifests/currencyservice.yaml
+        kubectl apply -f https://raw.githubusercontent.com/Shaheer4636/google-microservices-poc/master/microservices-demo-main/kubernetes-manifests/emailservice.yaml
+        kubectl apply -f https://raw.githubusercontent.com/Shaheer4636/google-microservices-poc/master/microservices-demo-main/kubernetes-manifests/frontend.yaml
+        kubectl apply -f https://raw.githubusercontent.com/Shaheer4636/google-microservices-poc/master/microservices-demo-main/kubernetes-manifests/kustomization.yaml
+        kubectl apply -f https://raw.githubusercontent.com/Shaheer4636/google-microservices-poc/master/microservices-demo-main/kubernetes-manifests/loadgenerator.yaml
+        kubectl apply -f https://raw.githubusercontent.com/Shaheer4636/google-microservices-poc/master/microservices-demo-main/kubernetes-manifests/paymentservice.yaml
+        kubectl apply -f https://raw.githubusercontent.com/Shaheer4636/google-microservices-poc/master/microservices-demo-main/kubernetes-manifests/productcatalogservice.yaml
+        kubectl apply -f https://raw.githubusercontent.com/Shaheer4636/google-microservices-poc/master/microservices-demo-main/kubernetes-manifests/recommendationservice.yaml
+        kubectl apply -f https://raw.githubusercontent.com/Shaheer4636/google-microservices-poc/master/microservices-demo-main/kubernetes-manifests/shippingservice.yaml
