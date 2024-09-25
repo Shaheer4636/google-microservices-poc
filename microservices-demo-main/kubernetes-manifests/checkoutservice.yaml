@@ -42,7 +42,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: checkoutservice
+          image: shaheergooglepracticeregistry.azurecr.io/checkoutservice:latest
           ports:
           - containerPort: 5050
           readinessProbe:
