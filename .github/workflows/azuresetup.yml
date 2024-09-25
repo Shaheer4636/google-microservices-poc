@@ -3,7 +3,7 @@ name: Azure Infrastructure Setup
 on:
   push:
     branches:
-      - master
+      - dev 
 
 permissions:
   id-token: write
