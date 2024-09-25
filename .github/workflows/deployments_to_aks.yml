@@ -10,16 +10,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout kubernetes-manifests directory only
+    - name: Checkout kubernetes-manifests directory
       run: |
+        # Create a directory to hold the manifests
         mkdir kubernetes-manifests
         cd kubernetes-manifests
         git init
         git remote add origin https://github.com/Shaheer4636/google-microservices-poc.git
         git config core.sparseCheckout true
         echo "microservices-demo-main/kubernetes-manifests/*" >> .git/info/sparse-checkout
-        git pull origin master
-        
+        git pull origin dev  # Clone the manifests from the dev branch
+
     - name: Log in to Azure
       uses: azure/login@v1
       with:
@@ -33,5 +34,5 @@ jobs:
 
     - name: Apply Kubernetes Manifests
       run: |
-        cd repo/microservices-demo-main/kubernetes-manifestss  # Navigate to the correct path
+        cd kubernetes-manifests  # Navigate to the kubernetes-manifests directory
         kubectl apply -f .  # Apply all manifests in the directory
