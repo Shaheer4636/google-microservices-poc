@@ -1,109 +1,115 @@
-# name: Pull Docker Images from DockerHub and Deploy to AKS
+name: Pull Docker Images from DockerHub and Deploy to AKS
 
-# on:
-#   push:
-#     branches:
-#       - dev
+on:
+  push:
+    branches:
+      - dev
 
-# permissions:
-#   id-token: write
-#   contents: read
+permissions:
+  id-token: write
+  contents: read
 
-# env:
-#   DOCKERHUB_USERNAME: shaheer4636
-#   AZURE_REGION: 'australiaeast'
-#   RESOURCE_GROUP: 'microservices-demo-rg'
-#   AKS_CLUSTER_NAME: 'microservices-demo-aks'
-#   ACR_NAME: 'shaheergooglepracticeregistry'
-#   IMAGE_TAG: latest
+env:
+  DOCKERHUB_USERNAME: shaheer4636
+  AZURE_REGION: 'australiaeast'
+  RESOURCE_GROUP: 'microservices-demo-rg'
+  AKS_CLUSTER_NAME: 'microservices-demo-aks'
+  ACR_NAME: 'shaheergooglepracticeregistry'
+  IMAGE_TAG: latest
 
-# jobs:
-#   pull_and_deploy:
-#     runs-on: ubuntu-latest
+jobs:
+  pull_and_deploy:
+    runs-on: ubuntu-latest
 
-#     steps:
-#     - name: Checkout code
-#       uses: actions/checkout@v3
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-#     - name: Login to DockerHub
-#       run: |
-#         echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login --username ${{ env.DOCKERHUB_USERNAME }} --password-stdin
+    - name: Login to DockerHub
+      run: |
+        echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login --username ${{ env.DOCKERHUB_USERNAME }} --password-stdin
 
-#     - name: Login to Azure
-#       uses: azure/login@v1.4.7
-#       with:
-#         creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Login to Azure
+      uses: azure/login@v1.4.7
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-#     - name: Login to ACR
-#       run: |
-#         az acr login --name ${{ env.ACR_NAME }}
+    - name: Login to ACR
+      run: |
+        az acr login --name ${{ env.ACR_NAME }}
 
-#     - name: Set up AKS Credentials
-#       run: |
-#         az aks get-credentials --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.AKS_CLUSTER_NAME }}
+    - name: Set up AKS Credentials
+      run: |
+        az aks get-credentials --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.AKS_CLUSTER_NAME }}
 
-#     - name: Pull and Push adservice image
-#       run: |
-#         docker pull ${{ env.DOCKERHUB_USERNAME }}/adservice:${{ env.IMAGE_TAG }}
-#         docker tag ${{ env.DOCKERHUB_USERNAME }}/adservice:${{ env.IMAGE_TAG }} ${{ env.ACR_NAME }}.azurecr.io/adservice:${{ env.IMAGE_TAG }}
-#         docker push ${{ env.ACR_NAME }}.azurecr.io/adservice:${{ env.IMAGE_TAG }}
+    # - name: Pull and Push adservice image
+    #   run: |
+    #     docker pull ${{ env.DOCKERHUB_USERNAME }}/adservice:${{ env.IMAGE_TAG }}
+    #     docker tag ${{ env.DOCKERHUB_USERNAME }}/adservice:${{ env.IMAGE_TAG }} ${{ env.ACR_NAME }}.azurecr.io/adservice:${{ env.IMAGE_TAG }}
+    #     docker push ${{ env.ACR_NAME }}.azurecr.io/adservice:${{ env.IMAGE_TAG }}
+    
+    - name: Pull and Push checkout image
+      run: |
+        docker pull ${{ env.DOCKERHUB_USERNAME }}/checkoutservice:${{ env.IMAGE_TAG }}
+        docker tag ${{ env.DOCKERHUB_USERNAME }}/checkoutservice:${{ env.IMAGE_TAG }} ${{ env.ACR_NAME }}.azurecr.io/checkoutservice:${{ env.IMAGE_TAG }}
+        docker push ${{ env.ACR_NAME }}.azurecr.io/checkoutservice:${{ env.IMAGE_TAG }}
 
-#     - name: Pull and Push cartservice image
-#       run: |
-#         docker pull ${{ env.DOCKERHUB_USERNAME }}/cartservice:${{ env.IMAGE_TAG }}
-#         docker tag ${{ env.DOCKERHUB_USERNAME }}/cartservice:${{ env.IMAGE_TAG }} ${{ env.ACR_NAME }}.azurecr.io/cartservice:${{ env.IMAGE_TAG }}
-#         docker push ${{ env.ACR_NAME }}.azurecr.io/cartservice:${{ env.IMAGE_TAG }}
+    # - name: Pull and Push cartservice image
+    #   run: |
+    #     docker pull ${{ env.DOCKERHUB_USERNAME }}/cartservice:${{ env.IMAGE_TAG }}
+    #     docker tag ${{ env.DOCKERHUB_USERNAME }}/cartservice:${{ env.IMAGE_TAG }} ${{ env.ACR_NAME }}.azurecr.io/cartservice:${{ env.IMAGE_TAG }}
+    #     docker push ${{ env.ACR_NAME }}.azurecr.io/cartservice:${{ env.IMAGE_TAG }}
 
-#     - name: Pull and Push currencyservice image
-#       run: |
-#         docker pull ${{ env.DOCKERHUB_USERNAME }}/currencyservice:${{ env.IMAGE_TAG }}
-#         docker tag ${{ env.DOCKERHUB_USERNAME }}/currencyservice:${{ env.IMAGE_TAG }} ${{ env.ACR_NAME }}.azurecr.io/currencyservice:${{ env.IMAGE_TAG }}
-#         docker push ${{ env.ACR_NAME }}.azurecr.io/currencyservice:${{ env.IMAGE_TAG }}
+    # - name: Pull and Push currencyservice image
+    #   run: |
+    #     docker pull ${{ env.DOCKERHUB_USERNAME }}/currencyservice:${{ env.IMAGE_TAG }}
+    #     docker tag ${{ env.DOCKERHUB_USERNAME }}/currencyservice:${{ env.IMAGE_TAG }} ${{ env.ACR_NAME }}.azurecr.io/currencyservice:${{ env.IMAGE_TAG }}
+    #     docker push ${{ env.ACR_NAME }}.azurecr.io/currencyservice:${{ env.IMAGE_TAG }}
 
-#     - name: Pull and Push emailservice image
-#       run: |
-#         docker pull ${{ env.DOCKERHUB_USERNAME }}/emailservice:${{ env.IMAGE_TAG }}
-#         docker tag ${{ env.DOCKERHUB_USERNAME }}/emailservice:${{ env.IMAGE_TAG }} ${{ env.ACR_NAME }}.azurecr.io/emailservice:${{ env.IMAGE_TAG }}
-#         docker push ${{ env.ACR_NAME }}.azurecr.io/emailservice:${{ env.IMAGE_TAG }}
+    # - name: Pull and Push emailservice image
+    #   run: |
+    #     docker pull ${{ env.DOCKERHUB_USERNAME }}/emailservice:${{ env.IMAGE_TAG }}
+    #     docker tag ${{ env.DOCKERHUB_USERNAME }}/emailservice:${{ env.IMAGE_TAG }} ${{ env.ACR_NAME }}.azurecr.io/emailservice:${{ env.IMAGE_TAG }}
+    #     docker push ${{ env.ACR_NAME }}.azurecr.io/emailservice:${{ env.IMAGE_TAG }}
 
-#     - name: Pull and Push frontend image
-#       run: |
-#         docker pull ${{ env.DOCKERHUB_USERNAME }}/frontend:${{ env.IMAGE_TAG }}
-#         docker tag ${{ env.DOCKERHUB_USERNAME }}/frontend:${{ env.IMAGE_TAG }} ${{ env.ACR_NAME }}.azurecr.io/frontend:${{ env.IMAGE_TAG }}
-#         docker push ${{ env.ACR_NAME }}.azurecr.io/frontend:${{ env.IMAGE_TAG }}
+    # - name: Pull and Push frontend image
+    #   run: |
+    #     docker pull ${{ env.DOCKERHUB_USERNAME }}/frontend:${{ env.IMAGE_TAG }}
+    #     docker tag ${{ env.DOCKERHUB_USERNAME }}/frontend:${{ env.IMAGE_TAG }} ${{ env.ACR_NAME }}.azurecr.io/frontend:${{ env.IMAGE_TAG }}
+    #     docker push ${{ env.ACR_NAME }}.azurecr.io/frontend:${{ env.IMAGE_TAG }}
 
-#     - name: Pull and Push loadgenerator image
-#       run: |
-#         docker pull ${{ env.DOCKERHUB_USERNAME }}/loadgenerator:${{ env.IMAGE_TAG }}
-#         docker tag ${{ env.DOCKERHUB_USERNAME }}/loadgenerator:${{ env.IMAGE_TAG }} ${{ env.ACR_NAME }}.azurecr.io/loadgenerator:${{ env.IMAGE_TAG }}
-#         docker push ${{ env.ACR_NAME }}.azurecr.io/loadgenerator:${{ env.IMAGE_TAG }}
+    # - name: Pull and Push loadgenerator image
+    #   run: |
+    #     docker pull ${{ env.DOCKERHUB_USERNAME }}/loadgenerator:${{ env.IMAGE_TAG }}
+    #     docker tag ${{ env.DOCKERHUB_USERNAME }}/loadgenerator:${{ env.IMAGE_TAG }} ${{ env.ACR_NAME }}.azurecr.io/loadgenerator:${{ env.IMAGE_TAG }}
+    #     docker push ${{ env.ACR_NAME }}.azurecr.io/loadgenerator:${{ env.IMAGE_TAG }}
 
-#     - name: Pull and Push paymentservice image
-#       run: |
-#         docker pull ${{ env.DOCKERHUB_USERNAME }}/paymentservice:${{ env.IMAGE_TAG }}
-#         docker tag ${{ env.DOCKERHUB_USERNAME }}/paymentservice:${{ env.IMAGE_TAG }} ${{ env.ACR_NAME }}.azurecr.io/paymentservice:${{ env.IMAGE_TAG }}
-#         docker push ${{ env.ACR_NAME }}.azurecr.io/paymentservice:${{ env.IMAGE_TAG }}
+    # - name: Pull and Push paymentservice image
+    #   run: |
+    #     docker pull ${{ env.DOCKERHUB_USERNAME }}/paymentservice:${{ env.IMAGE_TAG }}
+    #     docker tag ${{ env.DOCKERHUB_USERNAME }}/paymentservice:${{ env.IMAGE_TAG }} ${{ env.ACR_NAME }}.azurecr.io/paymentservice:${{ env.IMAGE_TAG }}
+    #     docker push ${{ env.ACR_NAME }}.azurecr.io/paymentservice:${{ env.IMAGE_TAG }}
 
-#     - name: Pull and Push productcatalogservice image
-#       run: |
-#         docker pull ${{ env.DOCKERHUB_USERNAME }}/productcatalog:${{ env.IMAGE_TAG }}
-#         docker tag ${{ env.DOCKERHUB_USERNAME }}/productcatalog:${{ env.IMAGE_TAG }} ${{ env.ACR_NAME }}.azurecr.io/productcatalogservice:${{ env.IMAGE_TAG }}
-#         docker push ${{ env.ACR_NAME }}.azurecr.io/productcatalogservice:${{ env.IMAGE_TAG }}
+    # - name: Pull and Push productcatalogservice image
+    #   run: |
+    #     docker pull ${{ env.DOCKERHUB_USERNAME }}/productcatalog:${{ env.IMAGE_TAG }}
+    #     docker tag ${{ env.DOCKERHUB_USERNAME }}/productcatalog:${{ env.IMAGE_TAG }} ${{ env.ACR_NAME }}.azurecr.io/productcatalogservice:${{ env.IMAGE_TAG }}
+    #     docker push ${{ env.ACR_NAME }}.azurecr.io/productcatalogservice:${{ env.IMAGE_TAG }}
 
-#     - name: Pull and Push recommendationservice image
-#       run: |
-#         docker pull ${{ env.DOCKERHUB_USERNAME }}/recommendationservice:${{ env.IMAGE_TAG }}
-#         docker tag ${{ env.DOCKERHUB_USERNAME }}/recommendationservice:${{ env.IMAGE_TAG }} ${{ env.ACR_NAME }}.azurecr.io/recommendationservice:${{ env.IMAGE_TAG }}
-#         docker push ${{ env.ACR_NAME }}.azurecr.io/recommendationservice:${{ env.IMAGE_TAG }}
+    # - name: Pull and Push recommendationservice image
+    #   run: |
+    #     docker pull ${{ env.DOCKERHUB_USERNAME }}/recommendationservice:${{ env.IMAGE_TAG }}
+    #     docker tag ${{ env.DOCKERHUB_USERNAME }}/recommendationservice:${{ env.IMAGE_TAG }} ${{ env.ACR_NAME }}.azurecr.io/recommendationservice:${{ env.IMAGE_TAG }}
+    #     docker push ${{ env.ACR_NAME }}.azurecr.io/recommendationservice:${{ env.IMAGE_TAG }}
 
-#     - name: Pull and Push shippingservice image
-#       run: |
-#         docker pull ${{ env.DOCKERHUB_USERNAME }}/shippingservice:${{ env.IMAGE_TAG }}
-#         docker tag ${{ env.DOCKERHUB_USERNAME }}/shippingservice:${{ env.IMAGE_TAG }} ${{ env.ACR_NAME }}.azurecr.io/shippingservice:${{ env.IMAGE_TAG }}
-#         docker push ${{ env.ACR_NAME }}.azurecr.io/shippingservice:${{ env.IMAGE_TAG }}
+    # - name: Pull and Push shippingservice image
+    #   run: |
+    #     docker pull ${{ env.DOCKERHUB_USERNAME }}/shippingservice:${{ env.IMAGE_TAG }}
+    #     docker tag ${{ env.DOCKERHUB_USERNAME }}/shippingservice:${{ env.IMAGE_TAG }} ${{ env.ACR_NAME }}.azurecr.io/shippingservice:${{ env.IMAGE_TAG }}
+    #     docker push ${{ env.ACR_NAME }}.azurecr.io/shippingservice:${{ env.IMAGE_TAG }}
 
-#     - name: Pull and Push shoppingassistants image
-#       run: |
-#         docker pull ${{ env.DOCKERHUB_USERNAME }}/shoppingassistants:${{ env.IMAGE_TAG }}
-#         docker tag ${{ env.DOCKERHUB_USERNAME }}/shoppingassistants:${{ env.IMAGE_TAG }} ${{ env.ACR_NAME }}.azurecr.io/shoppingassistants:${{ env.IMAGE_TAG }}
-#         docker push ${{ env.ACR_NAME }}.azurecr.io/shoppingassistants:${{ env.IMAGE_TAG }}
+    # - name: Pull and Push shoppingassistants image
+    #   run: |
+    #     docker pull ${{ env.DOCKERHUB_USERNAME }}/shoppingassistants:${{ env.IMAGE_TAG }}
+    #     docker tag ${{ env.DOCKERHUB_USERNAME }}/shoppingassistants:${{ env.IMAGE_TAG }} ${{ env.ACR_NAME }}.azurecr.io/shoppingassistants:${{ env.IMAGE_TAG }}
+    #     docker push ${{ env.ACR_NAME }}.azurecr.io/shoppingassistants:${{ env.IMAGE_TAG }}
