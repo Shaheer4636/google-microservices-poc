@@ -43,7 +43,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: cartservice
+        image: shaheergooglepracticeregistry.azurecr.io/cartservice:latest
         ports:
         - containerPort: 7070
         env:
@@ -51,8 +51,8 @@ spec:
           value: "redis-cart:6379"
         resources:
           requests:
-            cpu: 200m
-            memory: 64Mi
+            cpu: 100m
+            memory: 100Mi
           limits:
             cpu: 300m
             memory: 128Mi
